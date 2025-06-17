@@ -7,7 +7,7 @@ from http import HTTPStatus
 from dotenv import load_dotenv
 from telebot import TeleBot
 
-import exception
+import exceptions
 
 
 load_dotenv()
@@ -62,9 +62,9 @@ def get_api_answer(timestamp):
         response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
     except requests.RequestException as request_exc:
         logger.error(f'Ошибка при вызове API Практикума. {request_exc}')
-        raise exception.APIPracticumError('Ошибка при запросе к API')
+        raise exceptions.APIPracticumError('Ошибка при запросе к API')
     if response.status_code != HTTPStatus.OK:
-        raise exception.WrongStatus(f'Статус ответа {response.status_code}.')
+        raise exceptions.WrongStatus(f'Статус ответа {response.status_code}.')
     return response.json()
 
 
@@ -123,7 +123,7 @@ def main():
         ) if globals()[varname] is None]
         msg = f'Нехватка переменных окружения {lackvariables}. Бот остановлен!'
         logger.critical(msg)
-        raise exception.LackEnvVariables(msg)
+        raise exceptions.LackEnvVariables(msg)
     bot = TeleBot(token=TELEGRAM_TOKEN)
     last_msg = ''
     msg = ''
