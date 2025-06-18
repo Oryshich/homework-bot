@@ -84,7 +84,7 @@ def send_message(bot, message):
 def get_api_answer(timestamp):
     """Получение данных от API Практикума."""
     payload = {'from_date': timestamp}
-    REQ_PARAMS = {
+    req_params = {
         'url': ENDPOINT,
         'headers': HEADERS,
         'params': payload
@@ -92,9 +92,9 @@ def get_api_answer(timestamp):
     try:
         logger.debug(
             'Отправка запроса к API Практикума по адресу {url},'
-            ' заголовок {headers}, параметры {params}'.format(**REQ_PARAMS)
+            ' заголовок {headers}, параметры {params}'.format(**req_params)
         )
-        response = requests.get(**REQ_PARAMS)
+        response = requests.get(**req_params)
     except requests.RequestException as error:
         raise exceptions.APIPracticumError(
             f'Ошибка при запросе к API {error}'
