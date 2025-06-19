@@ -71,14 +71,13 @@ def send_message(bot, message):
         logger.debug('Сообщение подготовлено к отправке в телеграмм.')
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.debug(f'Сообщение отправлено в телеграмм. {message}')
-    except apihelper.ApiException as error:
-        logger.error(f'Сбой при отправке сообщения в телеграмм: {error}')
-        return False
-    except requests.exceptions.RequestException as error:
-        logger.error(f'Сбой при отправке сообщения в телеграмм: {error}')
-        return False
-    else:
         return True
+    except (
+        apihelper.ApiException,
+        requests.exceptions.RequestException
+    ) as error:
+        logger.error(f'Сбой при отправке сообщения в телеграмм: {error}')
+        return False
 
 
 def get_api_answer(timestamp):
@@ -144,9 +143,6 @@ def main():
             'Нехватка переменных окружения. Бот остановлен!'
         )
     bot = TeleBot(token=TELEGRAM_TOKEN)
-    last_dtu = ''
-    dtu = ''
-    msg = ''
     timestamp = int(time.time())
     while True:
         try:
@@ -154,19 +150,14 @@ def main():
             homeworks = check_response(answer)
             if not homeworks:
                 logger.debug('Список работ пуст.')
-                continue
-            msg = parse_status(homeworks[0])
-            dtu = homeworks[0].get('date_updated', last_dtu)
+            else:
+                msg = parse_status(homeworks[0])
+                if send_message(bot, msg):
+                    timestamp = answer.get('current_date', timestamp)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
         finally:
-            if dtu != last_dtu:
-                if send_message(bot, msg):
-                    last_dtu = dtu
-                    timestamp = answer.get('current_date', timestamp)
-            else:
-                logger.debug('Новой информации нет.')
             time.sleep(RETRY_PERIOD)
 
 
